@@ -1,0 +1,361 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0024)http://raybibi.com/12a5/ -->
+<HTML><HEAD><TITLE>Class 12A5</TITLE>
+<META content="text/html; charset=windows-1258" http-equiv=Content-Type>
+<META name=Author content="Class 12A5">
+<META content=no http-equiv=imagetoolbar>
+<STYLE type=text/css>HTML {
+	OVERFLOW: hidden
+}
+BODY {
+	POSITION: absolute; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-LEFT: 0px; WIDTH: 100%; PADDING-RIGHT: 0px; FONT-FAMILY: arial; BACKGROUND: #eee; HEIGHT: 100%; COLOR: #fff; FONT-SIZE: 0.8em; PADDING-TOP: 0px
+}
+#screen {
+	POSITION: absolute; WIDTH: 100%; BACKGROUND: #000; HEIGHT: 100%; OVERFLOW: hidden
+}
+#screen IMG {
+	POSITION: absolute; CURSOR: pointer; LEFT: -9999px; image-rendering: optimizeSpeed
+}
+canvas {
+	POSITION: absolute; CURSOR: pointer; LEFT: -9999px; image-rendering: optimizeSpeed
+}
+#screen .href {
+	BORDER-BOTTOM: #fff 1px dotted; BORDER-LEFT: #fff 1px dotted; BORDER-TOP: #fff 1px dotted; BORDER-RIGHT: #fff 1px dotted
+}
+#screen .fog {
+	POSITION: absolute; FILTER: alpha(opacity=10); BACKGROUND: #fff; opacity: 0.1
+}
+#command {
+	Z-INDEX: 30000; BORDER-BOTTOM: #000 1em solid; POSITION: absolute; BORDER-LEFT: #000 1em solid; WIDTH: 130px; BACKGROUND: #000; BORDER-TOP: #000 1em solid; TOP: 1em; BORDER-RIGHT: #000 1em solid; LEFT: 1em
+}
+#bar {
+	POSITION: relative; HEIGHT: 160px; TOP: 1em; LEFT: 1em
+}
+#bar .button {
+	POSITION: absolute; WIDTH: 20px; BACKGROUND: #222; HEIGHT: 20px; CURSOR: pointer
+}
+#bar .loaded {
+	BACKGROUND: #666
+}
+#bar .viewed {
+	BACKGROUND: #fff
+}
+#bar .selected {
+	BACKGROUND: #f00
+}
+#urlInfo {
+	Z-INDEX: 30000; POSITION: absolute; PADDING-LEFT: 12px; BACKGROUND: url(http://psdtuts.com/tutorials/5_FleurDeLis/1.jpg) no-repeat 0px 4px; VISIBILITY: hidden; CURSOR: pointer
+}
+</STYLE>
+
+<SCRIPT language=JavaScript> 
+document.onmousedown=click 
+var times=0 
+var times2=10 
+function click() { 
+if ((event.button==2) || (event.button==3)) { 
+alert("Class 12A5^^"); 
+times++ } } 
+function bye()  
+{alert 
+bye() } 
+
+</SCRIPT>
+
+<SCRIPT type=text/javascript> 
+ var m3D = function () { 
+	/* ---- private vars ---- */ 
+	var diapo = [], 
+		imb, 
+		scr, 
+		bar, 
+		selected, 
+		urlInfo, 
+		imagesPath = "random/", 
+		camera = {x:0, y:0, z:-650, s:0, fov: 500}, 
+		nw = 0, 
+		nh = 0; 
+	/* ==== camera tween methods ==== */ 
+	camera.setTarget = function (c0, t1, p) { 
+		if (Math.abs(t1 - c0) > .1) { 
+			camera.s = 1; 
+			camera.p = 0; 
+			camera.d = t1 - c0; 
+			if (p) { 
+				camera.d *= 2; 
+				camera.p = 9; 
+			} 
+		} 
+	} 
+	camera.tween = function (v) { 
+		if (camera.s != 0) { 
+			camera.p += camera.s; 
+			camera[v] += camera.d * camera.p * .01; 
+			if (camera.p == 10) camera.s = -1; 
+			else if (camera.p == 0) camera.s = 0; 
+		} 
+		return camera.s; 
+	} 
+	/* ==== diapo constructor ==== */ 
+	var Diapo = function (n, img, x, y, z) { 
+		if (img) { 
+			this.url = img.url; 
+			this.title = img.title; 
+			this.color = img.color; 
+			this.isLoaded = false; 
+			if (document.createElement("canvas").getContext) { 
+				/* ---- using canvas in place of images (performance trick) ---- */ 
+				this.srcImg = new Image(); 
+				this.srcImg.src = imagesPath + img.src; 
+				this.img = document.createElement("canvas"); 
+				this.canvas = true; 
+				scr.appendChild(this.img); 
+			} else { 
+				/* ---- normal image ---- */ 
+				this.img = document.createElement('img'); 
+				this.img.src = imagesPath + img.src; 
+				scr.appendChild(this.img); 
+			} 
+			/* ---- on click event ---- */ 
+			this.img.onclick = function () { 
+				if (camera.s) return; 
+				if (this.diapo.isLoaded) { 
+					if (this.diapo.urlActive) { 
+						/* ---- jump hyperlink ---- */ 
+						top.location.href = this.diapo.url; 
+					} else { 
+						/* ---- target positions ---- */ 
+						camera.tz = this.diapo.z - camera.fov; 
+						camera.tx = this.diapo.x; 
+						camera.ty = this.diapo.y; 
+						/* ---- disable previously selected img ---- */ 
+						if (selected) { 
+							selected.but.className = "button viewed"; 
+							selected.img.className = ""; 
+							selected.img.style.cursor = "pointer"; 
+							selected.urlActive = false; 
+							urlInfo.style.visibility = "hidden"; 
+						} 
+						/* ---- select current img ---- */ 
+						this.diapo.but.className = "button selected"; 
+						interpolation(false); 
+						selected = this.diapo; 
+					} 
+				} 
+			} 
+			/* ---- command bar buttons ---- */ 
+			this.but = document.createElement('div'); 
+			this.but.className = "button"; 
+			bar.appendChild(this.but); 
+			this.but.diapo = this; 
+			this.but.style.left = Math.round((this.but.offsetWidth  * 1.2) * (n % 4)) + 'px'; 
+			this.but.style.top  = Math.round((this.but.offsetHeight * 1.2) * Math.floor(n / 4)) + 'px'; 
+			this.but.onclick = this.img.onclick; 
+			imb = this.img; 
+			this.img.diapo = this; 
+			this.zi = 25000; 
+		} else { 
+			/* ---- transparent div ---- */ 
+			this.img = document.createElement('div'); 
+			this.isLoaded = true; 
+			this.img.className = "fog"; 
+			scr.appendChild(this.img); 
+			this.w = 300; 
+			this.h = 300; 
+			this.zi = 15000; 
+		} 
+		/* ---- object variables ---- */ 
+		this.x = x; 
+		this.y = y; 
+		this.z = z; 
+		this.css = this.img.style; 
+	} 
+	/* ==== main 3D animation ==== */ 
+	Diapo.prototype.anim = function () { 
+		if (this.isLoaded) { 
+			/* ---- 3D to 2D projection ---- */ 
+			var x = this.x - camera.x; 
+			var y = this.y - camera.y; 
+			var z = this.z - camera.z; 
+			if (z < 20) z += 5000; 
+			var p = camera.fov / z; 
+			var w = this.w * p; 
+			var h = this.h * p; 
+			/* ---- HTML rendering ---- */ 
+			this.css.left   = Math.round(nw + x * p - w * .5) + 'px'; 
+			this.css.top    = Math.round(nh + y * p - h * .5) + 'px'; 
+			this.css.width  = Math.round(w) + 'px'; 
+			this.css.height = Math.round(h) + 'px'; 
+			this.css.zIndex = this.zi - Math.round(z); 
+		} else { 
+			/* ---- image is loaded? ---- */ 
+			this.isLoaded = this.loading(); 
+		} 
+	} 
+	/* ==== onload initialization ==== */ 
+	Diapo.prototype.loading = function () { 
+		if ((this.canvas && this.srcImg.complete) || this.img.complete) { 
+			if (this.canvas) { 
+				/* ---- canvas version ---- */ 
+				this.w = this.srcImg.width; 
+				this.h = this.srcImg.height; 
+				this.img.width = this.w; 
+				this.img.height = this.h; 
+				var context = this.img.getContext("2d"); 
+				context.drawImage(this.srcImg, 0, 0, this.w, this.h); 
+			} else { 
+				/* ---- plain image version ---- */ 
+				this.w = this.img.width; 
+				this.h = this.img.height; 
+			} 
+			/* ---- button loaded ---- */ 
+			this.but.className += " loaded"; 
+			return true; 
+		} 
+		return false; 
+	} 
+	//////////////////////////////////////////////////////////////////////////// 
+	/* ==== screen dimensions ==== */ 
+	var resize = function () { 
+		nw = scr.offsetWidth * .5; 
+		nh = scr.offsetHeight * .5; 
+	} 
+	/* ==== disable interpolation during animation ==== */ 
+	var interpolation = function (bicubic) { 
+		var i = 0, o; 
+		while( o = diapo[i++] ) { 
+			if (o.but) { 
+				o.css.msInterpolationMode = bicubic ? 'bicubic' : 'nearest-neighbor'; // makes IE8 happy 
+				o.css.imageRendering = bicubic ? 'optimizeQuality' : 'optimizeSpeed'; // does not really work... 
+			} 
+		} 
+	} 
+	/* ==== init script ==== */ 
+	var init = function (data) { 
+		/* ---- containers ---- */ 
+		scr = document.getElementById("screen"); 
+		bar = document.getElementById("bar"); 
+		urlInfo = document.getElementById("urlInfo"); 
+		resize(); 
+		/* ---- loading images ---- */ 
+		var i = 0, 
+		    o, 
+			n = data.length; 
+		while( o = data[i++] ) { 
+			/* ---- images ---- */ 
+			var x = 1000 * ((i % 4) - 1.5); 
+			var y = Math.round(Math.random() * 4000) - 2000; 
+			var z = i * (5000 / n); 
+			diapo.push( new Diapo(i - 1, o, x, y, z)); 
+			/* ---- transparent frames ---- */ 
+			var k = diapo.length - 1; 
+			for (var j = 0; j < 3; j++) { 
+				var x = Math.round(Math.random() * 4000) - 2000; 
+				var y = Math.round(Math.random() * 4000) - 2000; 
+				diapo.push( new Diapo(k, null, x, y, z + 100)); 
+			} 
+		} 
+		/* ---- start engine ---- */ 
+		run(); 
+	} 
+	//////////////////////////////////////////////////////////////////////////// 
+	/* ==== main loop ==== */ 
+	var run = function () { 
+		/* ---- x axis move ---- */ 
+		if (camera.tx) { 
+			if (!camera.s) camera.setTarget(camera.x, camera.tx); 
+			var m = camera.tween('x'); 
+			if (!m) camera.tx = 0; 
+		/* ---- y axis move ---- */ 
+		} else if (camera.ty) { 
+			if (!camera.s) camera.setTarget(camera.y, camera.ty); 
+			var m = camera.tween('y'); 
+			if (!m) camera.ty = 0; 
+		/* ---- z axis move ---- */ 
+		} else if (camera.tz) { 
+			if (!camera.s) camera.setTarget(camera.z, camera.tz); 
+			var m = camera.tween('z'); 
+			if (!m) { 
+				/* ---- animation end ---- */ 
+				camera.tz = 0; 
+				interpolation(true); 
+				/* ---- activate hyperlink ---- */ 
+				if (selected.url) { 
+					selected.img.style.cursor = "pointer"; 
+					selected.urlActive = true; 
+					selected.img.className = "href"; 
+					urlInfo.diapo = selected; 
+					urlInfo.onclick = selected.img.onclick; 
+					urlInfo.innerHTML = selected.title || selected.url; 
+					urlInfo.style.visibility = "visible"; 
+					urlInfo.style.color = selected.color || "#fff"; 
+					urlInfo.style.top = Math.round(selected.img.offsetTop + selected.img.offsetHeight - urlInfo.offsetHeight - 5) + "px"; 
+					urlInfo.style.left = Math.round(selected.img.offsetLeft + selected.img.offsetWidth - urlInfo.offsetWidth - 5) + "px"; 
+				} else { 
+					selected.img.style.cursor = "default"; 
+				} 
+			} 
+		} 
+		/* ---- anim images ---- */ 
+		var i = 0, o; 
+		while( o = diapo[i++] ) o.anim(); 
+		/* ---- loop ---- */ 
+		setTimeout(run, 32); 
+	} 
+	return { 
+		//////////////////////////////////////////////////////////////////////////// 
+		/* ==== initialize script ==== */ 
+		init : init 
+	} 
+}(); 
+ 
+</SCRIPT>
+
+<META name=GENERATOR content="MSHTML 8.00.7600.16700"></HEAD>
+<BODY>
+<DIV id=screen>
+<DIV id=command>
+<H1><FONT color=yellow><B>Class 12A5
+<HR>
+12A5 forever in my heart</FONT></H1><PRE><B>
+Name: 12A5 ( 2011-2012 )
+Age: All 18
+School: THPT Cho Gao
+Add: Huyen Cho Gao
+<OBJECT width=1 height=1>
+<PARAM NAME="movie" VALUE="http://static.mp3.zdn.vn/skins/mp3_main/flash/player/mp3Player_skin1.swf?xmlurl=http://mp3.zing.vn/blog?MjAxMS8xMS8yMC8wLzgvInagaMEMDhlOWI1NTRiZTk4Y2QzNGIxMjBjOTA3NDg2MjYxMGYdUngWeBXAzfEdp4WeBqlYyBNxqEgVGjhdUngqddUngIFRpw6pdUngfE1pdSBMw6p8MXwy">
+<PARAM NAME="quality" VALUE="high">
+<PARAM NAME="wmode" VALUE="transparent">
+<embed width="1" height="1" src="http://static.mp3.zdn.vn/skins/mp3_main/flash/player/mp3Player_skin1.swf?xmlurl=http://mp3.zing.vn/blog?MjAxMS8xMS8yMC8wLzgvInagaMEMDhlOWI1NTRiZTk4Y2QzNGIxMjBjOTA3NDg2MjYxMGYdUngWeBXAzfEdp4WeBqlYyBNxqEgVGjhdUngqddUngIFRpw6pdUngfE1pdSBMw6p8MXwy" quality="high" wmode="transparent" type="application/x-shockwave-flash"></embed></OBJECT><BR>
+</B>
+</PRE>
+<DIV id=bar></DIV></DIV>
+<DIV id=urlInfo></DIV></DIV>
+<SCRIPT type=text/javascript> 
+/* ==== start script ==== */ 
+setTimeout(function() { 
+	m3D.init( 
+		[ 
+			{ src: 'a.jpg', url: 'E:/tam/Class12A5/', title: 'jump to random script', color: '#fff'}, 
+			{ src: 'b.jpg' },
+                        { src: 'c.jpg' },
+                        { src: 'd.jpg' },
+                        { src: 'f.jpg' },
+                        { src: 'g.jpg' },
+                        { src: 'h.jpg' },
+                        { src: 'i.jpg' },                          
+			 
+
+		] 
+	); 
+}, 500); 
+</SCRIPT>
+
+<P>
+<OBJECT 
+style="BORDER-BOTTOM: #666666 0px dashed; FILTER: Alpha(Opacity=40); BORDER-LEFT: #666666 0px dashed; BORDER-TOP: #666666 0px dashed; BORDER-RIGHT: #666666 0px dashed" 
+classid=clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6 width=0 height=0><PARAM NAME="URL" VALUE=""><PARAM NAME="rate" VALUE="1"><PARAM NAME="balance" VALUE="0"><PARAM NAME="currentPosition" VALUE="0"><PARAM NAME="defaultFrame" VALUE=""><PARAM NAME="playCount" VALUE="10"><PARAM NAME="autoStart" VALUE="-1"><PARAM NAME="currentMarker" VALUE="0"><PARAM NAME="invokeURLs" VALUE="-1"><PARAM NAME="baseURL" VALUE=""><PARAM NAME="volume" VALUE="100"><PARAM NAME="mute" VALUE="0"><PARAM NAME="uiMode" VALUE="mini"><PARAM NAME="stretchToFit" VALUE="0"><PARAM NAME="windowlessVideo" VALUE="0"><PARAM NAME="enabled" VALUE="-1"><PARAM NAME="enableContextMenu" VALUE="0"><PARAM NAME="fullScreen" VALUE="0"><PARAM NAME="SAMIStyle" VALUE=""><PARAM NAME="SAMILang" VALUE=""><PARAM NAME="SAMIFilename" VALUE=""><PARAM NAME="captioningID" VALUE=""><PARAM NAME="enableErrorDialogs" VALUE="0"><PARAM NAME="_cx" VALUE="4233"><PARAM NAME="_cy" VALUE="4366">
+                           <EMBED type="application/x-mplayer2" 
+src="http://kenh37.info/va.mp3" width="0" height="0" volume="100" 
+showstatusbar="1" enablecontextmenu="0" 
+playcount="10"></OBJECT></P></B></BODY></HTML>
